@@ -1,0 +1,61 @@
+# Pipeline to do the following:
+# - Create a new VM from a marketplace image
+# - Run Windows Update on the VM
+# - Configure the VM
+# - Install applications
+# - Shutdown the VM
+
+trigger: none
+
+pool: my-hosted-pool
+
+variables:
+  armConnection: 'ADO-ARM-SC01'
+  subscriptionId: '7732fb83-c4f6-4982-9cee-f6f1f31500b5'
+  rgName: 'ado-rg'
+  baseVmName: 'ado01'
+  location: 'East US'
+
+steps:
+# Power on the VM, if not already powered on
+- task: AzurePowerShell@5
+  inputs:
+    azureSubscription: $(armConnection)
+    ScriptType: 'InlineScript'
+    Inline: |
+      Start-AzVM -ResourceGroupName $(rgName) -Name $(baseVmName) -Force
+    FailOnStandardError: true
+    azurePowerShellVersion: 'LatestVersion'
+
+# Install the PS module PSWindowsUpdate and update Windows
+- task: AzurePowerShell@5
+  inputs:
+    azureSubscription: $(armConnection)
+    ScriptType: 'InlineScript'
+    Inline: |
+      $localScriptPath = "$(Build.Repository.LocalPath)\ApplyWindowsUpdates.ps1"
+      Invoke-AzVMRunCommand -ResourceGroupName $(rgName) -Name $(baseVmName) -CommandId 'RunPowerShellScript' -ScriptPath $localScriptPath
+    FailOnStandardError: true
+    azurePowerShellVersion: 'LatestVersion'
+
+# Reboot the VM, if required
+- task: AzurePowerShell@5
+  inputs:
+    azureSubscription: $(armConnection)
+    ScriptType: 'InlineScript'
+    Inline: |
+      Restart-AzVM -ResourceGroupName $(rgName) -Name $(baseVmName)
+    FailOnStandardError: true
+    azurePowerShellVersion: 'LatestVersion'
+
+# Add steps to configure Windows and install/remove applications, as required.
+
+# Power off the VM
+- task: AzurePowerShell@5
+  inputs:
+    azureSubscription: $(armConnection)
+    ScriptType: 'InlineScript'
+    Inline: |
+      Stop-AzVM -ResourceGroupName $(rgName) -Name $(baseVmName) -Force
+    FailOnStandardError: true
+    azurePowerShellVersion: 'LatestVersion'

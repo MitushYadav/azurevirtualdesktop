@@ -1,0 +1,1 @@
+Set-AzVm -ResourceGroupName $rgName -Name $vmName -Generalized

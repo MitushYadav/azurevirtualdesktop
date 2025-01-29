@@ -1,0 +1,28 @@
+# Pipeline to do the following:
+# - Create new VMs from the ACG image and install the required software to allow them to act as session hosts for the given hostpool.
+
+trigger: none
+
+pool: my-hosted-pool
+
+variables:
+  armConnection: 'ADO-ARM-SC01'
+  subscriptionId: '7732fb83-c4f6-4982-9cee-f6f1f31500b5'
+  rgName: 'ado-rg'
+  location: 'East US'
+
+steps:
+# create a starter VM using an ARM template
+# this template assumes that a vNEt and a subnet already exist.
+- task: AzureResourceManagerTemplateDeployment@3
+  inputs:
+    deploymentScope: 'Resource Group'
+    azureResourceManagerConnection: $(armConnection)
+    subscriptionId: $(subscriptionId)
+    action: 'Create Or Update Resource Group'
+    resourceGroupName: $(rgName)
+    location: $(location)
+    templateLocation: 'Linked artifact'
+    csmFile: '$(Build.Repository.LocalPath)\template.json'
+    csmParametersFile: '$(Build.Repository.LocalPath)\parameters.json'
+    deploymentMode: 'Incremental'

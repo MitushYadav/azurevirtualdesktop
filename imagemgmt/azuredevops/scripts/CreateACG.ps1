@@ -1,0 +1,2 @@
+$resourceGroupACG = New-AzResourceGroup -Name 'myGalleryRG' -Location 'East US'	
+$gallery = New-AzGallery -GalleryName 'myGallery' -ResourceGroupName $resourceGroupACG.ResourceGroupName -Location $resourceGroupACG.Location -Description 'Azure Compute Gallery AVD'

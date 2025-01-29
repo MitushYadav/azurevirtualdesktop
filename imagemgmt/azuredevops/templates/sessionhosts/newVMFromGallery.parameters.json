@@ -1,0 +1,71 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "artifactsLocation": {
+            "value": "https://raw.githubusercontent.com/Azure/RDS-Templates/master/ARM-wvd-templates/DSC/Configuration.zip"
+        },
+        "rdshPrefix": {
+            "value": "" // TODO: Fill in parameter value
+        },
+        "rdshNumberOfInstances": {
+            "value": 0 // TODO: Fill in parameter value
+        },
+        "rdshVMDiskType": {
+            "value": "" // TODO: Fill in parameter value
+        },
+        "rdshVmSize": {
+            "value": "Standard_A2"
+        },
+        "rdshVmDiskSizeGB": {
+            "value": 0
+        },
+        "enableAcceleratedNetworking": {
+            "value": false
+        },
+        "domainAdministratorUsername": {
+            "value": "" // TODO: Fill in parameter value
+        },
+        "domainAdministratorPassword": {
+            "value": "" // TODO: Fill in parameter value
+        },
+        "vmAdministratorAccountUsername": {
+            "value": ""
+        },
+        "vmAdministratorAccountPassword": {
+            "value": ""
+        },
+        "subnet-id": {
+            "value": "" // TODO: Fill in parameter value
+        },
+        "rdshImageDefinitionId": {
+            "value": ""
+        },
+        "location": {
+            "value": ""
+        },
+        "vmInitialNumber": {
+            "value": 0
+        },
+        "_guidValue": {
+            "value": "" // TODO: Fill in parameter value
+        },
+        "hostpoolToken": {
+            "value": "" // TODO: Fill in parameter value
+        },
+        "hostpoolName": {
+            "value": "" // TODO: Fill in parameter value
+        },
+        "ouPath": {
+            "value": ""
+        },
+        "domain": {
+            "value": ""
+        },
+        "bootDiagnostics": {
+            "value": {
+              "enabled": false
+            }
+        }
+    }
+}

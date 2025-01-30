@@ -23,7 +23,7 @@ steps:
     azureSubscription: $(armConnection)
     ScriptType: 'InlineScript'
     Inline: |
-      Start-AzVM -ResourceGroupName $(rgName) -Name $(baseVmName) -Force
+      Start-AzVM -ResourceGroupName $(rgName) -Name $(baseVmName)
     FailOnStandardError: true
     azurePowerShellVersion: 'LatestVersion'
 

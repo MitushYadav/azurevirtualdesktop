@@ -10,6 +10,8 @@ variables:
   subscriptionId: '7732fb83-c4f6-4982-9cee-f6f1f31500b5'
   rgName: 'ado-rg'
   location: 'East US'
+  sessionHostNamePrefix: 'rdsh'
+  numberOfSessionHosts: 2
 
 steps:
 # create a starter VM using an ARM template
@@ -25,4 +27,5 @@ steps:
     templateLocation: 'Linked artifact'
     csmFile: '$(Build.Repository.LocalPath)\template.json'
     csmParametersFile: '$(Build.Repository.LocalPath)\parameters.json'
+    overrideParameters: '-rdshPrefix $(sessionHostNamePrefix) -rdshNumberOfInstances $(numberOfSessionHosts)'
     deploymentMode: 'Incremental'

@@ -28,13 +28,21 @@ param (
     $DestinationVmSize = "Standard_D2as_v5",
     [Parameter(Mandatory=$false)]
     [switch]
+    $ShutdownSourceVm,
+    [Parameter(Mandatory=$false)]
+    [switch]
     $CreatePublicIP
 )
+
+$ErrorActionPreference = 'Stop'
 
 #region CreateSnapshot
 $Location = (Get-AzResourceGroup -Name $SourceResourceGroupName).Location
 $snapshotName = "mySnapshot-$(get-date -f ddMMyyyyHHmm)"
 
+if($ShutdownSourceVm) {
+    Stop-AzVM -ResourceGroupName $SourceResourceGroupName -Name $SourceVMName -Force -Confirm:$false
+}
 $srcVm = Get-AzVM -ResourceGroupName $SourceResourceGroupName -Name $SourceVMName
 $snapshot = New-AzSnapshotConfig -SourceUri $($srcVm.StorageProfile.OsDisk.ManagedDisk.Id) -Location $Location -CreateOption copy
 
@@ -45,7 +53,11 @@ $vmSnapshot = New-AzSnapshot -Snapshot $snapshot -SnapshotName $snapshotName -Re
 
 #region CreateVMFromSnapshot
 $newOsDiskName = $($DestinationVMName + "-osdisk")
-$diskConfig = New-AzDiskConfig -SkuName $storageType -Location $location -CreateOption Copy -SourceResourceId $($vmSnapshot.Id) -DiskSizeGB $diskSize
+$srcOsDiskName = $srcVm.StorageProfile.OsDisk.Name
+$srcVmOsDisk = Get-AzDisk -ResourceGroupName $SourceResourceGroupName -DiskName $srcOsDiskName
+$destVmOsDiskSize = $srcVmOsDisk.DiskSizeGB
+$destVmOsDiskStorageType = $srcVmOsDisk.Sku.Name
+$diskConfig = New-AzDiskConfig -SkuName $destVmOsDiskStorageType -Location $location -CreateOption Copy -SourceResourceId $($vmSnapshot.Id) -DiskSizeGB $destVmOsDiskSize
 $newOsDisk = New-AzDisk -Disk $diskConfig -ResourceGroupName $DestinationResourceGroupName -DiskName $newOsDiskName
 
 if($CreatePublicIP) {
@@ -77,11 +89,11 @@ if($CreatePublicIP) {
 $nic = New-AzNetworkInterface @nicOptions
 
 # create the VM
-$vmConfig = New-AzVMConfig -VMName $DestinationVMName -VMSize $vmSize
+$vmConfig = New-AzVMConfig -VMName $DestinationVMName -VMSize $DestinationVmSize
 
 $vm = Add-AzVMNetworkInterface -VM $vmConfig -Id $nic.Id
-$destVmStorageAccountType = $srcVm.storageprofile.osdisk.manageddisk.StorageAccountType
-$destVmOsDiskSize = $srcVm.StorageProfile.OsDisk.DiskSizeGB
+#$destVmStorageAccountType = $srcVm.storageprofile.osdisk.manageddisk.StorageAccountType
+$destVmStorageAccountType = $destVmOsDiskStorageType # are they the same?
 $vm = Set-AzVMOSDisk -VM $vm -ManagedDiskId $newOsDisk.Id -StorageAccountType $destVmStorageAccountType -DiskSizeInGB $destVmOsDiskSize -CreateOption Attach -Windows
 
 New-AzVM -ResourceGroupName $DestinationResourceGroupName -Location $location -VM $vm

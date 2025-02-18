@@ -2,6 +2,8 @@
 .DESCRIPTION
 This script syspreps the current VM on which the script is running.
 IMPORTANT: Run it only on the VM to be sysprepped. 
+
+Author: Mitush Yadav
 #>
 
 try {

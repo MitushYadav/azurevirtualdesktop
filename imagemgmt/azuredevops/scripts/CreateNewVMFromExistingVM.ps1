@@ -1,6 +1,8 @@
 <#
 .DESCRIPTION
 This script creates a new VM from an existing VM.
+
+Author: Mitush Yadav
 #>
 
 [CmdletBinding()]

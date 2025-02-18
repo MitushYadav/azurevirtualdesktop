@@ -1,7 +1,15 @@
 <#
 .DESCRIPTION
 This script installs the PSWindowsUpdate module and uses it to apply Windows updates on the machine.
+
+Author: Mitush Yadav
+
+.NOTES
+If using for Azure Windows VMs, this only works for Desktop/Client OS(Win10/Win11), not Server OS.
+
 #>
+
+
 
 [CmdletBinding()]
 param (
@@ -25,14 +33,7 @@ try {
     # install the NuGet package provider if required
     if(-not(Get-PackageProvider -Name Nuget -ListAvailable -ErrorAction SilentlyContinue)) {
         Write-Log "Nuget package provider not found. Installing."
-        $sourceArgs = @{
-            Name = 'nuget.org'
-            Location = 'https://api.nuget.org/v3/index.json'
-            ProviderName = 'NuGet'
-        }
-        Register-PackageSource @sourceArgs
         Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Confirm:$false -ErrorAction Stop
-        #Get-PackageProvider | Where-Object name -eq 'nuget' | Install-PackageProvider -Force -Confirm:$false -ErrorAction Stop #
         Write-Log -LogString "Installed the Nuget Package Provider"
     }
 }
@@ -68,15 +69,18 @@ catch {
 }
 
 Import-Module PSWindowsUpdate
-Write-Log -LogString "Imported the PsWindowsUpdate module"
+Write-Log -LogString "Imported the PSWindowsUpdate module"
 
 try {
     Add-WUServiceManager -MicrosoftUpdate -Silent -Confirm:$false
     $updates = Get-WindowsUpdate
     if($updates) {
         Write-Log -LogString "Updates are available. Downloading and applying updates."
-        Install-WindowsUpdate -Install -MicrosoftUpdate -AcceptAll -AutoReboot | Out-File "C:\Windows\Temp\$(get-date -f yyyy-MM-dd)-WindowsUpdate.log" -Force
-        Write-log -LogString "Installed WindowsUpdate."
+        Write-Log -LogString "Available Updates: `n$($updates | Out-String)"
+        Install-WindowsUpdate -Install -MicrosoftUpdate -AcceptAll -IgnoreReboot | Out-File "C:\Windows\Temp\$(get-date -f yyyy-MM-dd)-WindowsUpdate.log" -Force
+        Write-Log -LogString "Installed Windows Updates. You might want to reboot your computer."
+        $rebootStatus = Get-WURebootStatus -Silent
+        Write-Log -LogString "Reboot required: $rebootStatus"
     }
     else {
         Write-Log -LogString "No updates to install."

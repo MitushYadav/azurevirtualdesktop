@@ -1,0 +1,260 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "baseVmName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the base VM to clone"
+            }
+        },
+        "baseVmResourceGroupName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the resource group of base VM"
+            }
+        },
+        "baseVmOsDiskResourceId": {
+            "type": "string",
+            "metadata": {
+                "description": "Resource ID of the OS Disk of the base VM. This disk will be used to create the snapshot."
+            }
+        },
+        "baseVmSnapshotName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the base VM snapshot"
+            },
+            "defaultValue": "[concat(parameters('baseVmName') , '-ss-', utcNow('ddMMyyyymmss'))]"
+        },
+        "baseVmSnapshotSku": {
+            "type": "string",
+            "allowedValues": [ "Standard_LRS" ,"Premium_LRS", "Standard_ZRS"],
+            "metadata": {
+                "description": "Account Type of the snapshot"
+            }
+        },
+        "baseVmSnapshotPublicAccess": {
+            "type": "string",
+            "allowedValues": ["Enabled", "Disabled"],
+            "metadata": {
+                "description": "Whether to allow public access to the snapshot"
+            },
+            "defaultValue": "Enabled"
+        },
+        "baseVmSnapshotnetworkAccessPolicy": {
+            "type": "string",
+            "allowedValues": ["AllowAll", "AllowPrivate", "DenyAll"],
+            "metadata": {
+                "description": "Snapshot network access policy"
+            },
+            "defaultValue": "Enabled"
+        },
+        "destinationVmSize": {
+            "type": "string",
+            "metadata": {
+                "description": "Size of the clone VM"
+            },
+            "defaultValue": "Standard_D2as_v5"
+        },
+        "destinationVmName": {
+            "type": "string",
+            "maxLength": 8,
+            "metadata": {
+                "description": "Name of the clone VM"
+            }
+        },
+        "createDestinationVMPublicIP": {
+            "type": "bool",
+            "metadata": {
+                "description": "Whether to create a public IP for the destination VM"
+            },
+            "defaultValue": false
+        },
+        "destinationVmSubnetId": {
+            "type": "string",
+            "metadata": {
+                "description": "ResourceID of the subnet for the clone VM"
+            }
+        },
+        "destinationVmOsDiskSizeGB": {
+            "type": "int",
+            "metadata": {
+                "description": "Size in GB of the Os Disk of the clone VM"
+            }
+        }
+    },
+    "variables": {
+        "destinationVmOsDiskName": "[concat(parameters('destinationVmName'), '-osdisk')]",
+        "destinationVmNicName": "[concat(parameters('destinationVmName'), '-nic')]",
+        "destinationVmNsgName": "[concat(parameters('destinationVmName'), '-nsg')]",
+        "destinationVmPipName": "[concat(parameters('destinationVmName'), '-pip')]",
+        "storageAccountName": "strageaccntmanu01"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/snapshots",
+            "apiVersion": "2024-03-02",
+            "name": "[parameters('baseVmSnapshotName')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "[parameters('baseVmSnapshotSku')]"
+            },
+            "properties": {
+                "creationData": {
+                    "createOption": "Copy",
+                    "sourceResourceId": "[parameters('baseVmOsDiskResourceId')]"
+                },
+                "dataAccessAuthMode": "None",
+                "networkAccessPolicy": "[parameters('baseVmSnapshotnetworkAccessPolicy')]",
+                "publicNetworkAccess": "[parameters('baseVmSnapshotPublicAccess')]",
+                "incremental": false
+            }
+
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2022-05-01",
+            "name": "[variables('storageAccountName')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "Storage"
+        },
+        {
+            "condition": "[parameters('createDestinationVMPublicIP')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2024-05-01",
+            "name": "[variables('destinationVmPipName')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic"
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2024-05-01",
+            "name": "[variables('destinationVmNsgName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "default-allow-3389",
+                        "properties": {
+                            "priority": 1000,
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "destinationPortRange": "3389",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2024-05-01",
+            "name": "[variables('destinationVmNicName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[parameters('destinationVmSubnetId')]"
+                            },
+                            "publicIPAddress": "[if(parameters('createDestinationVMPublicIP'), resourceId('Microsoft.Network/publicIPAddresses', variables('destinationVmPipName')), json('null'))]"
+                        }
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('destinationVmPipName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Compute/disks",
+            "apiVersion": "2024-03-02",
+            "location": "[resourceGroup().location]",
+            "name": "[variables('destinationVmOsDiskName')]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "properties": {
+                "creationData": {
+                    "createOption": "Copy",
+                    "sourceResourceId": "[resourceId('Microsoft.Compute/snapshots',parameters('baseVmSnapshotName'))]"
+                },
+                "diskSizeGB": "[parameters('destinationVmOsDiskSizeGB')]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/snapshots', parameters('baseVmSnapshotName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2024-07-01",
+            "name": "[parameters('destinationVmName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('destinationVmSize')]"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "diskSizeGB": "[parameters('destinationVmOsDiskSizeGB')]",
+                        "createOption": "Attach",
+                        "managedDisk": {
+                            "id": "[resourceId('Microsoft.Compute/disks',variables('destinationVmOsDiskName'))]"
+                        },
+                        "osType": "Windows"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('destinationVmNicName'))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": false
+                    }
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('destinationVmNicName'))]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('destinationVmNsgName'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('destinationVmPipName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2024-07-01",
+            "name": "RenameComputerExtension",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.7",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    // TODO: how to run a powershell command with a dynamic variable
+                    "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -Command ''"
+                }
+                
+            }
+        }
+        
+    ]
+}

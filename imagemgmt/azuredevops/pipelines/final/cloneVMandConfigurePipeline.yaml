@@ -9,17 +9,20 @@ trigger: none
 pool: my-hosted-pool
 
 variables:
-  armConnection: 'ADO-ARM-SC01'
-  subscriptionId: '7732fb83-c4f6-4982-9cee-f6f1f31500b5'
-  sourceRgName: 'ado-rg'
-  sourceVmName: 'ado01'
-  destinationRgName: 'ado-rg-dest2'
-  destinationVmName: 'ado03'
-  galleryRgName: 'myGalleryRG'
-  galleryName: 'myGallery'
-  galleryDefinitionName: 'myImageDefinition'
-  galleryImageVersion: '1.0.0'
-  location: 'East US'
+  # add as pipeline editor variables
+  #armConnection: ''
+  #subscriptionId: ''
+  sourceRgName: ''
+  sourceVmName: ''
+  destinationRgName: ''
+  destinationVmName: ''
+  destinationVnetName: ''
+  destinationSubnetName: ''
+  galleryRgName: ''
+  galleryName: ''
+  galleryDefinitionName: ''
+  galleryImageVersion: ''
+  location: ''
 
 
 steps:
@@ -56,8 +59,8 @@ steps:
       -SourceVMName $(sourceVmName) `
       -DestinationResourceGroupName $(destinationRgName) `
       -DestinationVMName $(destinationVmName) `
-      -DestinationVNetworkName 'vNet01' `
-      -DestinationSubnetName 'def-subnet'
+      -DestinationVNetworkName $(destinationVnetName) `
+      -DestinationSubnetName $(destinationSubnetName)
     FailOnStandardError: true
     azurePowerShellVersion: 'LatestVersion'
 

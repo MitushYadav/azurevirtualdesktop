@@ -10,11 +10,12 @@ trigger: none
 pool: my-hosted-pool
 
 variables:
-  armConnection: 'ADO-ARM-SC01'
-  subscriptionId: '7732fb83-c4f6-4982-9cee-f6f1f31500b5'
-  rgName: 'ado-rg'
-  baseVmName: 'ado01'
-  location: 'East US'
+  # add as pipeline editor variables
+  #armConnection: ''
+  #subscriptionId: ''
+  rgName: ''
+  baseVmName: ''
+  location: ''
 
 steps:
 # Power on the VM, if not already powered on

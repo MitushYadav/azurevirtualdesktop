@@ -6,13 +6,14 @@ trigger: none
 pool: my-hosted-pool
 
 variables:
-  armConnection: 'ADO-ARM-SC01'
-  subscriptionId: '7732fb83-c4f6-4982-9cee-f6f1f31500b5'
-  rgName: 'ado-rg'
-  location: 'East US'
+  # added as variables in the pipeline editor
+  #armConnection: ''
+  #subscriptionId: ''
+  rgName: ''
+  location: ''
 
 steps:
-# create a starter VM using an ARM template
+# create a starter VM using an existing ARM template
 # this template assumes that a vNEt and a subnet already exist.
 - task: AzureResourceManagerTemplateDeployment@3
   inputs:

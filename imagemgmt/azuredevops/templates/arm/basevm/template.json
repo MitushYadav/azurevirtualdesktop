@@ -5,14 +5,8 @@
         "location": {
             "type": "string"
         },
-        "networkInterfaceName": {
-            "type": "string"
-        },
         "enableAcceleratedNetworking": {
             "type": "bool"
-        },
-        "networkSecurityGroupName": {
-            "type": "string"
         },
         "networkSecurityGroupRules": {
             "type": "array"
@@ -21,9 +15,6 @@
             "type": "string"
         },
         "virtualNetworkId": {
-            "type": "string"
-        },
-        "publicIpAddressName": {
             "type": "string"
         },
         "publicIpAddressType": {
@@ -36,12 +27,6 @@
             "type": "string"
         },
         "virtualMachineName": {
-            "type": "string"
-        },
-        "virtualMachineComputerName": {
-            "type": "string"
-        },
-        "virtualMachineRG": {
             "type": "string"
         },
         "osDiskType": {
@@ -79,20 +64,23 @@
         }
     },
     "variables": {
-        "nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]",
+        "nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('nsgName'))]",
         "vnetId": "[parameters('virtualNetworkId')]",
         "vnetName": "[last(split(variables('vnetId'), '/'))]",
-        "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]"
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
+        "networkInterfaceName": "[concat(parameters('virtualMachineName'), '-nic')]",
+        "nsgName": "[concat(parameters('virtualMachineName'), '-nsg')]",
+        "pipName": "[concat(parameters('virtualMachineName'), '-pip')]"
     },
     "resources": [
         {
-            "name": "[parameters('networkInterfaceName')]",
+            "name": "[variables('networkInterfaceName')]",
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2022-11-01",
             "location": "[parameters('location')]",
             "dependsOn": [
-                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]",
-                "[concat('Microsoft.Network/publicIpAddresses/', parameters('publicIpAddressName'))]"
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]",
+                "[concat('Microsoft.Network/publicIpAddresses/', variables('pipName'))]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -104,7 +92,7 @@
                             },
                             "privateIPAllocationMethod": "Dynamic",
                             "publicIpAddress": {
-                                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))]",
+                                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', variables('pipName'))]",
                                 "properties": {
                                     "deleteOption": "[parameters('pipDeleteOption')]"
                                 }
@@ -119,7 +107,7 @@
             }
         },
         {
-            "name": "[parameters('networkSecurityGroupName')]",
+            "name": "[variables('nsgName')]",
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2020-05-01",
             "location": "[parameters('location')]",
@@ -128,7 +116,7 @@
             }
         },
         {
-            "name": "[parameters('publicIpAddressName')]",
+            "name": "[variables('pipName')]",
             "type": "Microsoft.Network/publicIpAddresses",
             "apiVersion": "2020-08-01",
             "location": "[parameters('location')]",
@@ -145,7 +133,7 @@
             "apiVersion": "2024-03-01",
             "location": "[parameters('location')]",
             "dependsOn": [
-                "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]"
+                "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
             ],
             "properties": {
                 "hardwareProfile": {
@@ -160,16 +148,16 @@
                         "deleteOption": "[parameters('osDiskDeleteOption')]"
                     },
                     "imageReference": {
-                        "publisher": "MicrosoftWindowsServer",
-                        "offer": "WindowsServer",
-                        "sku": "2022-datacenter-azure-edition-hotpatch",
+                        "publisher": "MicrosoftWindowsDesktop",
+                        "offer": "Windows-10",
+                        "sku": "win10-22h2-pro-g2",
                         "version": "latest"
                     }
                 },
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceName'))]",
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]",
                             "properties": {
                                 "deleteOption": "[parameters('nicDeleteOption')]"
                             }
@@ -181,7 +169,7 @@
                     "hibernationEnabled": false
                 },
                 "osProfile": {
-                    "computerName": "[parameters('virtualMachineComputerName')]",
+                    "computerName": "[parameters('virtualMachineName')]",
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPassword')]",
                     "windowsConfiguration": {
@@ -204,6 +192,10 @@
         "adminUsername": {
             "type": "string",
             "value": "[parameters('adminUsername')]"
+        },
+        "virtualMachineName": {
+            "type": "string",
+            "value": "[parameters('virtualMachineName')]"
         }
     }
 }

@@ -5,14 +5,8 @@
         "location": {
             "value": "eastus"
         },
-        "networkInterfaceName": {
-            "value": "ado01933"
-        },
         "enableAcceleratedNetworking": {
             "value": true
-        },
-        "networkSecurityGroupName": {
-            "value": "ado01-nsg"
         },
         "networkSecurityGroupRules": {
             "value": [
@@ -32,13 +26,10 @@
             ]
         },
         "subnetName": {
-            "value": "def-subnet"
+            "value": "" // TODO: Add value here
         },
         "virtualNetworkId": {
-            "value": "/subscriptions/7732fb83-c4f6-4982-9cee-f6f1f31500b5/resourceGroups/network-resources/providers/Microsoft.Network/virtualNetworks/vNet01"
-        },
-        "publicIpAddressName": {
-            "value": "ado01-ip"
+            "value": "" // TODO: Add value here
         },
         "publicIpAddressType": {
             "value": "Static"
@@ -50,10 +41,7 @@
             "value": "Delete"
         },
         "virtualMachineName": {
-            "value": "ado01"
-        },
-        "virtualMachineComputerName": {
-            "value": "ado01"
+            "value": "" // TODO: Add value here
         },
         "virtualMachineRG": {
             "value": "ado-rg"
@@ -74,10 +62,10 @@
             "value": false
         },
         "adminUsername": {
-            "value": "manu"
+            "value": "" // TODO: Add value here
         },
         "adminPassword": {
-            "value": "ManuYadav@1201!"
+            "value": "" // TODO: Add value here
         },
         "patchMode": {
             "value": "AutomaticByPlatform"

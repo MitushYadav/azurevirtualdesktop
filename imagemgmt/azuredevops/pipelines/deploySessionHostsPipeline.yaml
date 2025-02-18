@@ -6,11 +6,12 @@ trigger: none
 pool: my-hosted-pool
 
 variables:
-  armConnection: 'ADO-ARM-SC01'
-  subscriptionId: '7732fb83-c4f6-4982-9cee-f6f1f31500b5'
-  rgName: 'ado-rg'
-  location: 'East US'
-  sessionHostNamePrefix: 'rdsh'
+  # add as pipeline editor variables
+  #armConnection: ''
+  #subscriptionId: ''
+  rgName: ''
+  location: ''
+  sessionHostNamePrefix: ''
   numberOfSessionHosts: 2
 
 steps:

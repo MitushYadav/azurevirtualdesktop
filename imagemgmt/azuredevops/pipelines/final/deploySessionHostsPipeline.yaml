@@ -1,22 +1,30 @@
 # Pipeline to do the following:
 # - Create new VMs from the ACG image and install the required software to allow them to act as session hosts for the given hostpool.
+#
+# Author : Mitush Yadav
+# https://github.com/MitushYadav
 
 trigger: none
 
-pool: my-hosted-pool
+pool:
+  vmImage: 'windows-latest'
 
 variables:
-  # add as pipeline editor variables
+  # add the following 2 variables as pipeline editor variables, for security
   #armConnection: ''
   #subscriptionId: ''
+  # specify the resource group name to deploy the resources to
   rgName: ''
+  # specify the location for the resources, generally the resource group location
   location: ''
+  # specify the prefix for the session host VMs
   sessionHostNamePrefix: ''
-  numberOfSessionHosts: 2
+  # specify the number of session hosts to deploy, as number
+  numberOfSessionHosts: 
 
 steps:
-# create a starter VM using an ARM template
-# this template assumes that a vNEt and a subnet already exist.
+# deploy the ARM template for creating AVD session hosts. The template is present under templates\arm\sessionhosts
+# this template assumes that a vNEt and a subnet already exist. Specify the required information in the parameters file
 - task: AzureResourceManagerTemplateDeployment@3
   inputs:
     deploymentScope: 'Resource Group'

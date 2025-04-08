@@ -1,0 +1,153 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "artifactsLocation": {
+            "value": "https://wvdportalstorageblob.blob.core.windows.net/galleryartifacts/Configuration_1.0.02929.635.zip"
+        },
+        "availabilityOption": {
+            "value": "None"
+        },
+        "availabilitySetName": {
+            "value": ""
+        },
+        "availabilityZones": {
+            "value": []
+        },
+        "vmGalleryImageOffer": {
+            "value": "Windows-10"
+        },
+        "vmGalleryImagePublisher": {
+            "value": "MicrosoftWindowsDesktop"
+        },
+        "vmGalleryImageHasPlan": {
+            "value": false
+        },
+        "vmGalleryImageSKU": {
+            "value": "win10-22h2-pro-g2"
+        },
+        "vmGalleryImageVersion": {
+            "value": "latest"
+        },
+        "rdshPrefix": {
+            "value": "avdsh"
+        },
+        "rdshNumberOfInstances": {
+            "value": 1
+        },
+        "rdshVMDiskType": {
+            "value": "Standard_LRS"
+        },
+        "rdshVmSize": {
+            "value": "Standard_D2as_v5"
+        },
+        "rdshVmDiskSizeGB": {
+            "value": 127
+        },
+        "rdshHibernate": {
+            "value": false
+        },
+        "enableAcceleratedNetworking": {
+            "value": true
+        },
+        "administratorAccountUsername": {
+            "value": "manu"
+        },
+        "administratorAccountPassword": {
+            "value": "MitushYadav@1201!"
+        },
+        "vmAdministratorAccountUsername": {
+            "value": "manu"
+        },
+        "vmAdministratorAccountPassword": {
+            "value": "MitushYadav@1201!"
+        },
+        "subnet-id": {
+            "value": "/subscriptions/7732fb83-c4f6-4982-9cee-f6f1f31500b5/resourceGroups/network-resources/providers/Microsoft.Network/virtualNetworks/vnet01/subnets/default"
+        },
+        "location": {
+            "value": "eastus"
+        },
+        "edgeZone": {
+            "value": ""
+        },
+        "createNetworkSecurityGroup": {
+            "value": false
+        },
+        "networkSecurityGroupId": {
+            "value": ""
+        },
+        "networkSecurityGroupRules": {
+            "value": []
+        },
+        "networkInterfaceTags": {
+            "value": {}
+        },
+        "networkSecurityGroupTags": {
+            "value": {}
+        },
+        "virtualMachineTags": {
+            "value": {}
+        },
+        "imageTags": {
+            "value": {}
+        },
+        "vmInitialNumber": {
+            "value": 1
+        },
+        "_guidValue": {
+            "value": "0141ebc7-a723-49ed-bb2c-9659c9ea5070"
+        },
+        "hostpoolToken": {
+            "value": "eyJhbGciOiJSUzI1NiIsImtpZCI6IkVEOTg0NzBDQ0QwNDBCNDBFRDkwNTIyQTAxQkNCMUY4M0UwQjkyNzEiLCJ0eXAiOiJKV1QifQ.eyJSZWdpc3RyYXRpb25JZCI6ImU2YjE5OTI4LTViZjEtNDgzZS1hNjZkLWMzMzlmMDliMzg2YSIsIkJyb2tlclVyaSI6Imh0dHBzOi8vcmRicm9rZXItZy11cy1yMC53dmQubWljcm9zb2Z0LmNvbS8iLCJEaWFnbm9zdGljc1VyaSI6Imh0dHBzOi8vcmRkaWFnbm9zdGljcy1nLXVzLXIwLnd2ZC5taWNyb3NvZnQuY29tLyIsIkVuZHBvaW50UG9vbElkIjoiMmQ5OGNkODMtMGU4My00OGM1LTgyYzItNjA3MTY1ZjM1ZmI4IiwiR2xvYmFsQnJva2VyVXJpIjoiaHR0cHM6Ly9yZGJyb2tlci53dmQubWljcm9zb2Z0LmNvbS8iLCJHZW9ncmFwaHkiOiJVUyIsIkdsb2JhbEJyb2tlclJlc291cmNlSWRVcmkiOiJodHRwczovLzJkOThjZDgzLTBlODMtNDhjNS04MmMyLTYwNzE2NWYzNWZiOC5yZGJyb2tlci53dmQubWljcm9zb2Z0LmNvbS8iLCJCcm9rZXJSZXNvdXJjZUlkVXJpIjoiaHR0cHM6Ly8yZDk4Y2Q4My0wZTgzLTQ4YzUtODJjMi02MDcxNjVmMzVmYjgucmRicm9rZXItZy11cy1yMC53dmQubWljcm9zb2Z0LmNvbS8iLCJEaWFnbm9zdGljc1Jlc291cmNlSWRVcmkiOiJodHRwczovLzJkOThjZDgzLTBlODMtNDhjNS04MmMyLTYwNzE2NWYzNWZiOC5yZGRpYWdub3N0aWNzLWctdXMtcjAud3ZkLm1pY3Jvc29mdC5jb20vIiwiQUFEVGVuYW50SWQiOiI0Y2NmMTBkZS1kMGY3LTQxMzUtODY4MC1iZDQ0NjlhODgzMjgiLCJuYmYiOjE3NDAwNTEwMjEsImV4cCI6MTc0MDEzNzM5MywiaXNzIjoiUkRJbmZyYVRva2VuTWFuYWdlciIsImF1ZCI6IlJEbWkifQ.EiQsiAm7Yq6RaZ_f3AG3V6ozQIsvXGYyfaHZa9HazN9JNlYR0emWy9bTE8wJgyI21lBBiEcvgHXVUb5tCC93MeRI9UXPRrRcRVSQNWEM10E4vEF3HK77nGJxbbWrhjTsY9hoWu6X5LPNfERC5D_9j_97oe_pArDWf1F2QGmANyjtx_aZ4G4ib6qDmyQq9c-Ma9oH3MuLhGkLsSlNAFtolqVJqF2uDgAtl_9TU5_g1Q6f4_NDBfg9E9h8W6hhR5oxqMsIwqeFg3-1mgouBEh2GUMhSnYXaM-QN7WoTvn6E5K5Z6TMzkg2A4G31AxGOMf6l017XbUHzprzW3pTctoN1g"
+        },
+        "hostpoolName": {
+            "value": "hp01"
+        },
+        "ouPath": {
+            "value": ""
+        },
+        "domain": {
+            "value": ""
+        },
+        "aadJoin": {
+            "value": true
+        },
+        "intune": {
+            "value": false
+        },
+        "bootDiagnostics": {
+            "value": {
+              "enabled": false
+            }
+        },
+        "userAssignedIdentity": {
+            "value": ""
+        },
+        "customConfigurationTemplateUrl": {
+            "value": ""
+        },
+        "customConfigurationParameterUrl": {
+            "value": ""
+        },
+        "SessionHostConfigurationVersion": {
+            "value": ""
+        },
+        "systemData": {
+            "value": {
+                "aadJoinPreview": false,
+                "sessionHostConfigurationVersion": "",
+                "firstPartyExtension": false
+              }
+        },
+        "securityType": {
+            "value": "TrustedLaunch"
+        },
+        "secureBoot": {
+            "value": true
+        },
+        "vTPM": {
+            "value": true
+        }
+    }
+}

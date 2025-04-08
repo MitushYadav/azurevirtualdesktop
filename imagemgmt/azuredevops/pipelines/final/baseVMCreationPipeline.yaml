@@ -1,20 +1,27 @@
 # Pipeline to do the following:
 # - Create a new VM from a marketplace image
+#
+# Author : Mitush Yadav
+# https://github.com/MitushYadav
 
 trigger: none
 
-pool: my-hosted-pool
+pool:
+  # or use a self hosted pool
+  vmImage: 'windows-latest'
 
 variables:
-  # add as pipeline editor variables
+  # add the following 2 variables as pipeline editor variables, for security
   #armConnection: ''
   #subscriptionId: ''
+  # specify the resource group to deploy the VM and its resources to
   rgName: ''
-  location: '''
+  # specify the location of the resources, generally the location of the resource group
+  location: ''
 
 steps:
-# create a starter VM using an ARM template
-# this template assumes that a vNEt and a subnet already exist.
+# create a VM using an ARM template. The associated ARM template is present under templates\arm\basevm
+# this template assumes that a vNEt and a subnet already exist. Edit the required information in the parameters file.
 - task: AzureResourceManagerTemplateDeployment@3
   inputs:
     deploymentScope: 'Resource Group'

@@ -3,25 +3,41 @@
 # - run WindowsUpdate and application maintenance on the VM
 # - sysprep the VM and set it to generalized
 # - create a new image version from the VM in the Azure Compute Gallery
+#
+# Author : Mitush Yadav
+# https://github.com/MitushYadav
 
 trigger: none
 
-pool: my-hosted-pool
+pool:
+  # or use a self hosted pool
+  vmImage: 'windows-latest'
 
 variables:
-  # add as pipeline editor variables
+  # add the following 2 variables as pipeline editor variables, for security
   #armConnection: ''
   #subscriptionId: ''
+  # specify the resource group name containing the source VM
   sourceRgName: ''
+  # specify the name of the source VM
   sourceVmName: ''
+  # specify the resource group to deploy the clone VM to. Will be created if not present
   destinationRgName: ''
+  # specify the name of the clone VM
   destinationVmName: ''
+  # specify the name of the vNet to which the clone VM will be attached
   destinationVnetName: ''
+  # specify the name of the subnet to which the clone VM will be attached
   destinationSubnetName: ''
+  # specify the resource group name of the existing Azure Compute Gallery
   galleryRgName: ''
+  # specify the name of the existing Azure Compute Gallery
   galleryName: ''
+  # specify the name of the existing Azure Compute Gallery definition
   galleryDefinitionName: ''
+  # specify the image version to give to the new image in ACG
   galleryImageVersion: ''
+  # specify the location of the resources to be deployed, generally the resource group location
   location: ''
 
 
@@ -64,19 +80,7 @@ steps:
     FailOnStandardError: true
     azurePowerShellVersion: 'LatestVersion'
 
-# run Windows Update on the VM
-# Install the PS module PSWindowsUpdate and update Windows
-- task: AzurePowerShell@5
-  inputs:
-    azureSubscription: $(armConnection)
-    ScriptType: 'InlineScript'
-    Inline: |
-      $localScriptPath = "$(Build.Repository.LocalPath)\ApplyWindowsUpdates.ps1"
-      Invoke-AzVMRunCommand -ResourceGroupName $(destinationRgName) -Name $(destinationVmName) -CommandId 'RunPowerShellScript' -ScriptPath $localScriptPath
-    FailOnStandardError: true
-    azurePowerShellVersion: 'LatestVersion'
-
-# add steps to install required applications(FSLogix, LOB apps, etc). Reboot after
+# add any required steps. for example, to cleanup local accounts, etc
 
 # Reboot the VM, if required
 - task: AzurePowerShell@5
@@ -99,7 +103,7 @@ steps:
     FailOnStandardError: true
     azurePowerShellVersion: 'LatestVersion'
 
-# set VM as Generalized and deallocate the VM(TODO) 
+# set VM as Generalized and deallocate the VM
 - task: AzurePowerShell@5
   inputs:
     azureSubscription: $(armConnection)

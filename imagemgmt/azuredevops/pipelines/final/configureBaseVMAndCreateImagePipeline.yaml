@@ -4,17 +4,25 @@
 # - Configure the VM
 # - Install applications
 # - Shutdown the VM
+#
+# Author : Mitush Yadav
+# https://github.com/MitushYadav
 
 trigger: none
 
-pool: my-hosted-pool
+pool:
+  # or use a self hosted pool
+  vmImage: 'windows-latest'
 
 variables:
-  # add as pipeline editor variables
+  # add the following 2 variables as pipeline editor variables, for security
   #armConnection: ''
   #subscriptionId: ''
+  # specify the resource group name containing the base VM
   rgName: ''
+  # specify the name of the base VM
   baseVmName: ''
+  # specify the location of the resources, generally the resource group location
   location: ''
 
 steps:
@@ -28,7 +36,10 @@ steps:
     FailOnStandardError: true
     azurePowerShellVersion: 'LatestVersion'
 
-# Install the PS module PSWindowsUpdate and update Windows
+# Add steps to configure Windows and install/remove applications, as required.
+
+# run Windows Update on the VM
+# Install the PS module PSWindowsUpdate and update Windows. As of now, this script only works correctly on windows client OS, including multi session.
 - task: AzurePowerShell@5
   inputs:
     azureSubscription: $(armConnection)
@@ -38,6 +49,8 @@ steps:
       Invoke-AzVMRunCommand -ResourceGroupName $(rgName) -Name $(baseVmName) -CommandId 'RunPowerShellScript' -ScriptPath $localScriptPath
     FailOnStandardError: true
     azurePowerShellVersion: 'LatestVersion'
+
+# add steps to install required applications(FSLogix, LOB apps, etc). Reboot after this.
 
 # Reboot the VM, if required
 - task: AzurePowerShell@5
@@ -49,8 +62,6 @@ steps:
     FailOnStandardError: true
     azurePowerShellVersion: 'LatestVersion'
 
-# Add steps to configure Windows and install/remove applications, as required.
-
 # Power off the VM
 - task: AzurePowerShell@5
   inputs:
@@ -58,90 +69,5 @@ steps:
     ScriptType: 'InlineScript'
     Inline: |
       Stop-AzVM -ResourceGroupName $(rgName) -Name $(baseVmName) -Force
-    FailOnStandardError: true
-    azurePowerShellVersion: 'LatestVersion'
-
-# Create destination resource group, if required
-- task: AzurePowerShell@5
-  inputs:
-    azureSubscription: $(armConnection)
-    ScriptType: 'InlineScript'
-    Inline: |
-      if($null -eq $(Get-AzResourceGroup -Name "$(destinationRgName)" -Location "$(location)" -ErrorAction SilentlyContinue)) {
-        New-AzResourceGroup -Name "$(destinationRgName)" -Location "$(location)"
-      }
-    FailOnStandardError: true
-    azurePowerShellVersion: 'LatestVersion'
-
-# Create a clone of the VM in the destination resource group. Uses a powershell script from the repo.
-- task: AzurePowerShell@5
-  inputs:
-    azureSubscription: $(armConnection)
-    ScriptType: 'FilePath'
-    ScriptPath: $(Build.Repository.LocalPath)\CreateNewVMFromExistingVM.ps1
-    ScriptArguments:
-      -SourceResourceGroupName $(sourceRgName) `
-      -SourceVMName $(sourceVmName) `
-      -DestinationResourceGroupName $(destinationRgName) `
-      -DestinationVMName $(destinationVmName) `
-      -DestinationVNetworkName 'vNet01' `
-      -DestinationSubnetName 'def-subnet'
-    FailOnStandardError: true
-    azurePowerShellVersion: 'LatestVersion'
-
-# run Windows Update on the VM
-# Install the PS module PSWindowsUpdate and update Windows
-- task: AzurePowerShell@5
-  inputs:
-    azureSubscription: $(armConnection)
-    ScriptType: 'InlineScript'
-    Inline: |
-      $localScriptPath = "$(Build.Repository.LocalPath)\ApplyWindowsUpdates.ps1"
-      Invoke-AzVMRunCommand -ResourceGroupName $(destinationRgName) -Name $(destinationVmName) -CommandId 'RunPowerShellScript' -ScriptPath $localScriptPath
-    FailOnStandardError: true
-    azurePowerShellVersion: 'LatestVersion'
-
-# add steps to install required applications(FSLogix, LOB apps, etc). Reboot after
-
-# Reboot the VM, if required
-- task: AzurePowerShell@5
-  inputs:
-    azureSubscription: $(armConnection)
-    ScriptType: 'InlineScript'
-    Inline: |
-      Restart-AzVM -ResourceGroupName $(destinationRgName) -Name $(destinationVmName)
-    FailOnStandardError: true
-    azurePowerShellVersion: 'LatestVersion'
-
-# sysprep Windows
-- task: AzurePowerShell@5
-  inputs:
-    azureSubscription: $(armConnection)
-    ScriptType: 'InlineScript'
-    Inline: |
-      $localScriptPath = "$(Build.Repository.LocalPath)\RunSysprep.ps1"
-      Invoke-AzVMRunCommand -ResourceGroupName $(destinationRgName) -Name $(destinationVmName) -CommandId 'RunPowerShellScript' -ScriptPath $localScriptPath
-    FailOnStandardError: true
-    azurePowerShellVersion: 'LatestVersion'
-
-# set VM as Generalized and stop & deallocate the VM
-- task: AzurePowerShell@5
-  inputs:
-    azureSubscription: $(armConnection)
-    ScriptType: 'InlineScript'
-    Inline: |
-      Set-AzVm -ResourceGroupName $(destinationRgName) -Name $(destinationVmName) -Generalized
-      Stop-AzVM -ResourceGroupName $(destinationRgName) -Name $(destinationVmName) -Force
-    FailOnStandardError: true
-    azurePowerShellVersion: 'LatestVersion'
-
-# create new image version in ACG(already present)
-- task: AzurePowerShell@5
-  inputs:
-    azureSubscription: $(armConnection)
-    ScriptType: 'InlineScript'
-    Inline: |
-      $vmId = (Get-AzVM -ResourceGroupName "$(destinationRgName)" -Name "$(destinationVmName)").Id
-      New-AzGalleryImageVersion -GalleryName "$(galleryName)" -GalleryImageDefinitionName "$(galleryDefinitionName)" -GalleryImageVersionName "$(galleryImageVersion)" -ResourceGroupName "$(galleryRgName)" -Location "$(location)" -SourceImageVMId $vmId
     FailOnStandardError: true
     azurePowerShellVersion: 'LatestVersion'
